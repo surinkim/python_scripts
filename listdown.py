@@ -3,7 +3,29 @@ from urllib.request import HTTPError
 from urllib.request import urlretrieve
 import os
 import sys
+import logging
+import logging.handlers
 
+# logger 인스턴스 생성 및 로그 레벨 설정#
+logger = logging.getLogger("downloader")
+logger.setLevel(logging.INFO)
+
+# formmater 생성
+formatter = logging.Formatter('[%(asctime)s %(levelname)s|%(filename)s:%(lineno)s] > %(message)s')
+
+# fileHandler와 StreamHandler를 생성
+fileHandler = logging.FileHandler('downloader.log')
+streamHandler = logging.StreamHandler()
+
+# handler에 fommater 세팅
+fileHandler.setFormatter(formatter)
+streamHandler.setFormatter(formatter)
+
+# Handler를 logging에 추가
+logger.addHandler(fileHandler)
+logger.addHandler(streamHandler)
+
+# 아래 urlretrieve 사용할 hook
 hookCount = 0
 
 def hook(blockNumber, blockSize, totalSize):
@@ -17,15 +39,18 @@ def hook(blockNumber, blockSize, totalSize):
         return
     else:
         hookCount = 0        
-        print('%s %% download.' % round(percentage))
+        logger.debug('%s %% download.' % round(percentage))
 
+logger.info('>>> Downloader start.')
+
+# url 리스트가 있는 파일
 readfile = 'server.dat'
 
 try:
     f = open(readfile, 'r')
 
 except IOError:
-    print('Could not read file.', readfile)
+    logger.critical('Could not read file.', readfile)
     sys.exit()
 
 lines = f.readlines()
@@ -33,11 +58,12 @@ f.close()
 
 for url in lines:
 
+    # url open validation 확인
     try:
         urlopen(url)
 
     except HTTPError as e:
-        print('Coud not open url = %s' % url)
+        logger.error('Coud not open url = %s' % url)
         continue
 
     pathlist = url.split('/')
@@ -48,10 +74,15 @@ for url in lines:
     directory = ip + '/' + date
     fullpath = directory + '/' + filename
 
-    print('directory = %s, fullpath = %s' % (directory, fullpath))
+    logger.debug('directory = %s, fullpath = %s' % (directory, fullpath))
 
     if not os.path.exists(directory):
         os.makedirs(directory)
 
+    logger.info('%s download start.' % fullpath)
+
+    # 파일 다운로드
     fname, header = urlretrieve(url, fullpath, hook)
-    print('%s saved.' % fname)
+    logger.info('%s download end.' % fullpath)
+
+logger.info('<<< Downloader end.')
