@@ -1,3 +1,5 @@
+from urllib.request import urlopen
+from urllib.request import HTTPError
 from urllib.request import urlretrieve
 import os
 import sys
@@ -30,6 +32,13 @@ lines = f.readlines()
 f.close()
 
 for url in lines:
+
+    try:
+        urlopen(url)
+
+    except HTTPError as e:
+        print('Coud not open url = %s' % url)
+        continue
 
     pathlist = url.split('/')
     filename = pathlist[-1].rstrip()
