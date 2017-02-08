@@ -4,26 +4,32 @@ from urllib.request import urlretrieve
 import os
 import sys
 import logging
-import logging.handlers
+import time
+from logging.handlers import TimedRotatingFileHandler
 
 # logger 인스턴스 생성 및 로그 레벨 설정#
 logger = logging.getLogger("downloader")
 logger.setLevel(logging.INFO)
 
+# timehandler
+timeHandler = TimedRotatingFileHandler('downloader.log', when='m', interval = 1, backupCount = 5)
+
 # formmater 생성
 formatter = logging.Formatter('[%(asctime)s %(levelname)s|%(filename)s:%(lineno)s] > %(message)s')
 
 # fileHandler와 StreamHandler를 생성
-fileHandler = logging.FileHandler('downloader.log')
+#fileHandler = logging.FileHandler('downloader.log')
 streamHandler = logging.StreamHandler()
 
 # handler에 fommater 세팅
-fileHandler.setFormatter(formatter)
+#fileHandler.setFormatter(formatter)
 streamHandler.setFormatter(formatter)
+timeHandler.setFormatter(formatter)
 
 # Handler를 logging에 추가
-logger.addHandler(fileHandler)
+#logger.addHandler(fileHandler)
 logger.addHandler(streamHandler)
+logger.addHandler(timeHandler)
 
 # 아래 urlretrieve 사용할 hook
 hookCount = 0
