@@ -33,3 +33,12 @@ url = 'www.dummy.net/%s/test.txt'
 url = url % time.strftime('%Y-%m-%d')
 print(url)
 
+url = 'www.dummy.net\\test.txt\n'
+print(url)
+
+url = url + '123'
+print(url)
+
+url = 'www.dummy.net\\test.txt\n'
+url = url.strip() + '123'
+print(url)
